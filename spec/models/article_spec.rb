@@ -25,6 +25,46 @@ describe Article do
     a = Article.new
     assert_equal [:body, :extended], a.content_fields
   end
+  
+  
+  describe "merge articles by ID" do
+    before :each do 
+
+      @article1 = Factory(:article, :title => 'title_article1', :body => 'body_article1', :published => true )#, :comments => [])
+      @comment1_article1 = Factory(:comment, :body => "comment1_article1_body", :article => @article1)
+      @comment2_article1 = Factory(:comment, :body => "comment2_article1_body", :article => @article1)
+      @article2 = Factory(:article, :title => 'title_article2', :body => 'body_article2', :published => true)#, :comments => [])
+      @comment1_article2 = Factory(:comment, :body => "comment1_article2_body", :article => @article2)
+      @comment2_article2 = Factory(:comment, :body => "comment2_article2_body", :article => @article2)
+    end
+    it "should call the model method that performs search by ID" do
+      Article.should_receive(:find_by_id).with("id").and_return(@article2)
+      @article1.merge_with("id")
+    end
+    it "should add the body of article2 to article1 after they have been merged" do
+      Article.stub(:find_by_id).with("id").and_return(@article2)
+      @article1.merge_with("id")  
+      @article1.body.should == "body_article1" + "body_article2" 
+    end 
+    it "should add the title of article2 to article1 after they have been merged" do
+      Article.stub(:find_by_id).with("id").and_return(@article2)
+      @article1.merge_with("id")  
+      @article1.title.should == "title_article1" + "title_article2"
+    end
+    it "should add the comments of article2 to article1 after they have been merged" do
+      Article.stub(:find_by_id).with("id").and_return(@article2)
+      article1_comments_before_merge = @article1.comments
+      @article1.merge_with("id")  
+      @article1.comments.should == [@comment1_article1, @comment2_article1, @comment1_article2, @comment2_article2]
+    end
+    it "should delete article2 after having merged it's content to article1" do
+      return_val = mock("Article")
+      Article.stub(:find_by_id).with("id").and_return(@article2)
+      @article2.should_receive(:destroy)
+      @article1.merge_with("id")  
+    end
+
+  end
 
   describe "#permalink_url" do
     describe "with hostname" do

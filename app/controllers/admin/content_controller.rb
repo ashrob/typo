@@ -26,7 +26,28 @@ class Admin::ContentController < Admin::BaseController
   def new
     new_or_edit
   end
+  
+  def merge 
+      article1 = Article.find_by_id(params[:id])
+      article2 = Article.find_by_id(params[:merge_id])
 
+      if(article1 != nil and article2 != nil and params[:id] != params[:merge_id])
+        unless current_user.admin?
+          redirect_to :action => 'index'
+          flash[:error] = _("Error, you are not allowed to perform this action")
+          return
+        end
+        flash[:notice] = article1.title.to_s + " and " + article2.title.to_s + " have been successfully merged" 
+        article1.merge_with(params[:merge_id])
+        article1.save!()
+        #flash[:error] = article1.comments.map{|c| c.article.title}.to_s
+      else
+        flash[:error] =  "The articles can't be merged"
+      end
+        
+      redirect_to :action => 'index'
+  end
+      
   def edit
     @article = Article.find(params[:id])
     unless @article.access_by? current_user
@@ -177,6 +198,7 @@ class Admin::ContentController < Admin::BaseController
         set_article_categories
         set_shortened_url if @article.published
         set_the_flash
+        #flash[:error] = params.to_s
         redirect_to :action => 'index'
         return
       end

@@ -16,7 +16,7 @@ class Article < Content
 
   belongs_to :user
 
-  has_many :pings,      :dependent => :destroy, :order => "created_at ASC"
+  has_many :pings, :dependent => :destroy, :order => "created_at ASC"
   has_many :trackbacks, :dependent => :destroy, :order => "created_at ASC"
   has_many :feedback, :order => "created_at DESC"
   has_many :resources, :order => "created_at DESC", :dependent => :nullify
@@ -24,7 +24,7 @@ class Article < Content
   has_many :categories, :through => :categorizations
   has_many :triggers, :as => :pending_item
 
-  has_many :comments,   :dependent => :destroy, :order => "created_at ASC" do
+  has_many :comments, :dependent => :destroy, :order => "created_at ASC" do
 
     # Get only ham or presumed_ham comments
     def ham
@@ -39,9 +39,9 @@ class Article < Content
   end
 
   with_options(:conditions => { :published => true }, :order => 'created_at DESC') do |this|
-    this.has_many :published_comments,   :class_name => "Comment", :order => "created_at ASC"
+    this.has_many :published_comments, :class_name => "Comment", :order => "created_at ASC"
     this.has_many :published_trackbacks, :class_name => "Trackback", :order => "created_at ASC"
-    this.has_many :published_feedback,   :class_name => "Feedback", :order => "created_at ASC"
+    this.has_many :published_feedback, :class_name => "Feedback", :order => "created_at ASC"
   end
 
   has_and_belongs_to_many :tags
@@ -61,7 +61,7 @@ class Article < Content
   scope :withdrawn, lambda { { :conditions => { :state => 'withdrawn' }, :order => 'published_at DESC' } }
   scope :published_at, lambda {|time_params| { :conditions => { :published => true, :published_at => Article.time_delta(*time_params) }, :order => 'published_at DESC' } }
 
-  setting :password,                   :string, ''
+  setting :password, :string, ''
 
   def initialize(*args)
     super
@@ -80,11 +80,11 @@ class Article < Content
   attr_accessor :draft, :keywords
 
   has_state(:state,
-            :valid_states  => [:new, :draft,
+            :valid_states => [:new, :draft,
                                :publication_pending, :just_published, :published,
                                :just_withdrawn, :withdrawn],
-            :initial_state =>  :new,
-            :handles       => [:withdraw,
+            :initial_state => :new,
+            :handles => [:withdraw,
                                :post_trigger,
                                :send_pings, :send_notifications,
                                :published_at=, :just_published?])
@@ -105,7 +105,7 @@ class Article < Content
       state = (search_hash[:state] and ["no_draft", "drafts", "published", "withdrawn", "pending"].include? search_hash[:state]) ? search_hash[:state] : 'no_draft'
       
       
-      list_function  = ["Article.#{state}"] + function_search_no_draft(search_hash)
+      list_function = ["Article.#{state}"] + function_search_no_draft(search_hash)
 
       if search_hash[:category] and search_hash[:category].to_i > 0
         list_function << 'category(search_hash[:category])'
@@ -414,6 +414,15 @@ class Article < Content
 
   def access_by?(user)
     user.admin? || user_id == user.id
+  end
+  
+  def merge_with(other_article_id)     
+  
+      other_article = Article.find_by_id(other_article_id)
+      self.body = self.body + other_article.body  
+      self.title = self.title + other_article.title
+      self.comments = self.comments + other_article.comments
+      other_article.destroy
   end
 
   protected

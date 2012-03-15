@@ -1,7 +1,3 @@
-<% @page_heading = _('New article') %>
-
-<%= render "admin/shared/edit", { :form_type => "article", :form_action => { :action => "new", :id => @article.id , :class => ('autosave')} } %>
-
 <div class='well'>
   <h4><%= _("Merge") %></h4>
   <%= form_tag(:controller => "/admin/content", :action => "merge", :id => @article.id) do %>
@@ -10,3 +6,5 @@
     <%= submit_tag("Merge") %>
   <% end %>
 </div>
+
+
