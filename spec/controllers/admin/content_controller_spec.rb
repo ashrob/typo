@@ -462,7 +462,6 @@ describe Admin::ContentController do
 
   end
 
-
   describe 'with admin connection' do
 
     before do
@@ -480,6 +479,37 @@ describe Admin::ContentController do
     it_should_behave_like 'new action'
     it_should_behave_like 'destroy action'
     it_should_behave_like 'autosave action'
+    
+    
+    describe 'merge action' do 
+      before :each do
+        @other_article = Factory(:article, :user => @user)
+      end
+      
+      it 'should redirect to the index template' do
+        post :merge , :id => 'id', :merge_id => 'merge_id'
+        response.should redirect_to(:action => 'index')  
+      end
+      it 'should make two calls to the Article#find_by_id' do
+        Article.should_receive(:find_by_id).exactly(2).times
+        post :merge , :id => 'id', :merge_id => 'merge_id'
+      end
+      
+      it 'should make a call to the @article#merge_with' do
+        Article.stub(:find_by_id).with('id').and_return(@article)
+        Article.stub(:find_by_id).with('merge_id').and_return(@other_article)
+        @article.should_receive(:merge_with).with('merge_id').and_return(@article)
+        post :merge , :id => 'id', :merge_id => 'merge_id'
+      end
+      
+      it 'should save the article in the database' do 
+        Article.stub(:find_by_id).with('id').and_return(@article)
+        Article.stub(:find_by_id).with('merge_id').and_return(@other_article)
+        @article.stub(:merge_with).with('merge_id').and_return(@article)
+        @article.should_receive(:save)
+        post :merge , :id => 'id', :merge_id => 'merge_id'
+      end
+    end
 
     describe 'edit action' do
 
@@ -622,6 +652,30 @@ describe Admin::ContentController do
     it_should_behave_like 'new action'
     it_should_behave_like 'destroy action'
 
+
+
+    describe 'merge action' do 
+      before :each do
+        @other_article = Factory(:article, :user => @user)
+      end
+      it 'should make two calls to the Article#find_by_id' do
+        Article.should_receive(:find_by_id).exactly(2).times
+        post :merge , :id => 'id', :merge_id => 'merge_id'
+      end
+      
+      it 'should redirect to the index template' do
+        post :merge , :id => 'id', :merge_id => 'merge_id'
+        response.should redirect_to(:action => 'index')  
+      end
+
+      it "should disallow merging to a publisher" do 
+        Article.stub(:find_by_id).with('id').and_return(@article)
+        Article.stub(:find_by_id).with('merge_id').and_return(@other_article)
+        @article.should_not_receive(:merge_with)
+        get :merge, :id => 'id', :merge_id => 'merge_id'
+      end
+    end
+    
     describe 'edit action' do
 
       it "should redirect if edit article doesn't his" do

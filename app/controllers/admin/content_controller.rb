@@ -33,13 +33,13 @@ class Admin::ContentController < Admin::BaseController
 
       if(article1 != nil and article2 != nil and params[:id] != params[:merge_id])
         unless current_user.admin?
-          redirect_to :action => 'index'
           flash[:error] = _("Error, you are not allowed to perform this action")
+          redirect_to :action => 'index'
           return
         end
         flash[:notice] = article1.title.to_s + " and " + article2.title.to_s + " have been successfully merged" 
         article1.merge_with(params[:merge_id])
-        article1.save!()
+        article1.save()
         #flash[:error] = article1.comments.map{|c| c.article.title}.to_s
       else
         flash[:error] =  "The articles can't be merged"
