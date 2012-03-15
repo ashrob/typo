@@ -29,11 +29,12 @@ describe Article do
   
   describe "merge articles by ID" do
     before :each do 
-
-      @article1 = Factory(:article, :title => 'title_article1', :body => 'body_article1', :published => true )#, :comments => [])
+      @user1 = Factory(:user)
+      @user2 = Factory(:user)
+      @article1 = Factory(:article, :user => @user1, :title =>'title_article1', :body =>'body_article1', :published => true)
       @comment1_article1 = Factory(:comment, :body => "comment1_article1_body", :article => @article1)
       @comment2_article1 = Factory(:comment, :body => "comment2_article1_body", :article => @article1)
-      @article2 = Factory(:article, :title => 'title_article2', :body => 'body_article2', :published => true)#, :comments => [])
+      @article2 = Factory(:article, :user => @user2, :title =>'title_article2', :body =>'body_article2', :published => true)
       @comment1_article2 = Factory(:comment, :body => "comment1_article2_body", :article => @article2)
       @comment2_article2 = Factory(:comment, :body => "comment2_article2_body", :article => @article2)
     end
@@ -49,7 +50,17 @@ describe Article do
     it "should add the title of article2 to article1 after they have been merged" do
       Article.stub(:find_by_id).with("id").and_return(@article2)
       @article1.merge_with("id")  
-      @article1.title.should == "title_article1" + "title_article2"
+      @article1.title.should == "title_article1"
+    end
+    it "should keep the title of article1 after they have been merged" do
+      Article.stub(:find_by_id).with("id").and_return(@article2)
+      @article1.merge_with("id")  
+      @article1.title.should == "title_article1"
+    end
+    it "should keep the user of article1 after they have been merged" do
+      Article.stub(:find_by_id).with("id").and_return(@article2)
+      @article1.merge_with("id")  
+      @article1.user.should == @user1
     end
     it "should add the comments of article2 to article1 after they have been merged" do
       Article.stub(:find_by_id).with("id").and_return(@article2)

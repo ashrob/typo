@@ -420,7 +420,6 @@ class Article < Content
   
       other_article = Article.find_by_id(other_article_id)
       self.body = self.body + other_article.body  
-      self.title = self.title + other_article.title
       self.comments = self.comments + other_article.comments
       other_article.destroy
   end
