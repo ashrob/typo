@@ -40,7 +40,6 @@ class Admin::ContentController < Admin::BaseController
         flash[:notice] = article1.title.to_s + " and " + article2.title.to_s + " have been successfully merged" 
         article1.merge_with(params[:merge_id])
         article1.save()
-        #flash[:error] = article1.comments.map{|c| c.article.title}.to_s
       else
         flash[:error] =  "The articles can't be merged"
       end
@@ -55,6 +54,7 @@ class Admin::ContentController < Admin::BaseController
       flash[:error] = _("Error, you are not allowed to perform this action")
       return
     end
+    @edit_action = true
     new_or_edit
   end
 

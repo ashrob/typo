@@ -47,11 +47,6 @@ describe Article do
       @article1.merge_with("id")  
       @article1.body.should == "body_article1" + "body_article2" 
     end 
-    it "should add the title of article2 to article1 after they have been merged" do
-      Article.stub(:find_by_id).with("id").and_return(@article2)
-      @article1.merge_with("id")  
-      @article1.title.should == "title_article1"
-    end
     it "should keep the title of article1 after they have been merged" do
       Article.stub(:find_by_id).with("id").and_return(@article2)
       @article1.merge_with("id")  
@@ -68,7 +63,7 @@ describe Article do
       @article1.merge_with("id")  
       @article1.comments.should == [@comment1_article1, @comment2_article1, @comment1_article2, @comment2_article2]
     end
-    it "should delete article2 after having merged it's content to article1" do
+    it "should destory article2 after having merged it's content to article1" do
       return_val = mock("Article")
       Article.stub(:find_by_id).with("id").and_return(@article2)
       @article2.should_receive(:destroy)
